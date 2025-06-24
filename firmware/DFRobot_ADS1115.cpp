@@ -177,6 +177,34 @@ void DFRobot_ADS1115::setOSMode(eADSOSMode_t value){
     writeAdsReg(ads_i2cAddress, DFROBOT_ADS1115_POINTER_CONFIG, conf);
 }
 
+float DFRobot_ADS1115::readVoltagePrecise(uint8_t channel)
+{
+    if (channel > 3)
+        return 0;
+    // Start with default config values
+    setCompQue(eCOMPQUE_NONE);
+    setCompLat(eCOMPLAT_NONLAT);
+    setCompPol(eCOMPPOL_LOW);
+    setCompMode(eCOMPMODE_TRAD);
+    if (channel == 0)
+        setMux(eADSMUX_5);
+    else if (channel == 1)
+        setMux(eADSMUX_6);
+    else if (channel == 2)
+        setMux(eADSMUX_7);
+    else if (channel == 3)
+        setMux(eADSMUX_8);
+    // Wait for the conversion to complete
+
+    uint16_t config = readAdsReg(ads_i2cAddress, DFROBOT_ADS1115_POINTER_CONFIG);
+    delay(ads_conversionDelay);
+    // Read the conversion results
+    // 16-bit unsigned results for the ADS1115
+    float Voltage = 0;
+    Voltage = (int16_t)readAdsReg(ads_i2cAddress, DFROBOT_ADS1115_POINTER_CONVERT) * coefficient;
+    return Voltage;
+}
+
 /*
  *Reads the conversion results, measuring the voltage
  *for a single-ended ADC reading from the specified channel
