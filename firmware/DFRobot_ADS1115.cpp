@@ -9,6 +9,12 @@
  * @date  2019-06-19
  * @url https://github.com/DFRobot/DFRobot_ADS1115
  */
+/*!
+ * @modifications
+ * @author Ivan Danylenko
+ * @date 2025-06-24
+ * - Added `float readVoltagePrecise(uint8_t channel)` to read voltage precisely (tens of microvolts).
+ */
 #include "Arduino.h"
 #include <Wire.h>
 #include <math.h>
