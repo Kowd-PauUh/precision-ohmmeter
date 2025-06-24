@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdint.h>
+#include <cstdint>
 #include <U8g2lib.h>
 
 // modify these as you need
@@ -48,6 +48,6 @@ void displayText(const char* line1, const char* line2) {
 void loop() {
     displayText("0.00 V", "0.0000 Ohm");
     delay(1000);
-    displayText("0.00 V", "0.0000 Ohm");
+    displayText("", "");
     delay(1000);
 }
