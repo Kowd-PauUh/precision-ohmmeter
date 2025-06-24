@@ -17,21 +17,26 @@ limitations under the License.
 #include <cstdint>
 #include <U8g2lib.h>
 
-// adjust these as you need
-constexpr float current = 0.005;                                          // 5 mA
-constexpr uint8_t adc_bits = 16;                                          // 16-bit ADC
-constexpr float adc_max_voltage = 3.3;                                    // 3.3 V
-constexpr float R4 = 10'000.0f;                                           // diff. amp. resistors
-constexpr float R5 = 330'000.0f;
-constexpr float R8 = 1'000.0f;
-constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);                 // diff. amp. gain
-constexpr float mode_1_gain = R5 / R4;
-// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);   // LCD on 1st I2C interface (optional)
+// ADJUST FOLLOWING AS YOU NEED
+
+constexpr float current = 0.005;        // 5 mA
+constexpr uint8_t adc_bits = 16;        // 16-bit ADC
+constexpr float adc_max_voltage = 3.3;  // 3.3 V
+
+// diff. amp. resistors
+constexpr float R4 = 10'000.0f;         // 10 kOhm
+constexpr float R5 = 330'000.0f;        // 330 kOhm
+constexpr float R8 = 1'000.0f;          // 1 kOhm
+
+// lcd display
+// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);   // LCD on 1st I2C interface
 U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
 
-// do not modify these
+// DO NOT MODIFY THESE
 float cell_voltage, resistance;
 constexpr uint32_t adc_range = 1 << adc_bits;
+constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain in first mode
+constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain in second mode
 
 void setup() {
     u8g2.begin();  // Initialize display
