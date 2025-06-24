@@ -351,5 +351,12 @@ public:
    * @return  The high threshold value
    */
   int16_t   getHighThreshold();
+  /**
+   * @fn readVoltagePrecise
+   * @brief Reads the precise voltage (tens of microvolts) of the specified channel
+   * @param  channel   The analog channnel of MCU
+   * @return Voltage in millivolts [mV]
+   */
+  float readVoltagePrecise(uint8_t channel);
 };
 
