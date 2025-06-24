@@ -17,13 +17,15 @@ limitations under the License.
 #include <cstdint>
 #include <U8g2lib.h>
 
-// modify these as you need
-constexpr uint8_t adc_bits = 16;
-// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 1st I2C interface
+// adjust these as you need
+constexpr float current = 0.005;                                          // 5 mA
+constexpr uint8_t adc_bits = 16;                                          // 16-bit ADC
+constexpr float adc_max_voltage = 3.3;                                    // 3.3 V
+// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);   // LCD on 1st I2C interface (optional)
 U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
 
 // do not modify these
-float cell_voltage, measured_resistance;
+float cell_voltage, resistance;
 constexpr uint32_t adc_range = 1 << adc_bits;
 
 void setup() {
@@ -44,7 +46,20 @@ void displayText(const char* line1, const char* line2) {
     u8g2.sendBuffer();
 }
 
+float compute_resistance(uint32_t adc_reading, float current) {
+    // R = U / I
+
+    if (current == 0.0f) {
+        return INFINITY;
+    }
+
+    float voltage_drop = adc_max_voltage * static_cast<float>(adc_reading) / static_cast<float>(adc_range);
+    return voltage_drop / current;
+}
+
 void loop() {
+    resistance = compute_resistance(0, current);
+
     displayText("0.00 V", "0.0000 Ohm");
     delay(1000);
     displayText("", "");
