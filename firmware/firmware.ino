@@ -15,7 +15,9 @@ limitations under the License.
 */
 
 #include <cstdint>
+#include <Wire.h>
 #include <U8g2lib.h>
+#include <DFRobot_ADS1115.h>
 
 // ADJUST FOLLOWING AS YOU NEED
 
@@ -29,9 +31,13 @@ constexpr float R4 = 10'000.0f;         // 10 kOhm
 constexpr float R5 = 330'000.0f;        // 330 kOhm
 constexpr float R8 = 1'000.0f;          // 1 kOhm
 
-// lcd display
+// LCD display
 // U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);   // LCD on 1st I2C interface
 U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
+
+// ADC converter
+DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
+// DFRobot_ADS1115 ads(&Wire1);  // ADC on 2nd I2C interface
 
 // DO NOT MODIFY THESE
 float cell_voltage, resistance;
@@ -41,6 +47,15 @@ constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (3
 
 void setup() {
     u8g2.begin();  // Initialize display
+    pinMode(29, OUTPUT);
+
+    Serial.begin(9600);
+    ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS0);   // 0x48
+    ads.setGain(eGAIN_ONE);                      // no gain
+    ads.setMode(eMODE_SINGLE);                   // single-shot mode
+    ads.setRate(eRATE_128);                      // 128 samples per second
+    ads.setOSMode(eOSMODE_SINGLE);               // manual trigger for each conversion
+    ads.init();
 }
 
 void displayText(const char* line1, const char* line2) {
@@ -69,6 +84,15 @@ float compute_resistance(uint32_t adc_reading, float current, float diff_amp_gai
     return voltage_drop / current;
 }
 
+void poll_adc(uint8_t channel) {
+    if (ads.checkADS1115())
+    {
+        uint16_t adc_reading = ads.readVoltage(channel);
+        Serial.print(adc_reading);
+        Serial.println("mV");
+    }
+}
+
 void loop() {
     // compute resistance value
     resistance = compute_resistance(10000, current, mode_0_gain);
@@ -85,5 +109,12 @@ void loop() {
     displayText(cell_voltage_str, resistance_str);
     delay(1000);
     displayText("", "");
+    delay(1000);
+
+    digitalWrite(29, HIGH);
+    poll_adc(0);
+    delay(1000);
+    digitalWrite(29, LOW);
+    poll_adc(0);
     delay(1000);
 }
