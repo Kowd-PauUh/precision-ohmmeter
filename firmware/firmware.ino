@@ -19,9 +19,10 @@ limitations under the License.
 
 // ADJUST FOLLOWING AS YOU NEED
 
-constexpr float current = 0.005;        // 5 mA
-constexpr uint8_t adc_bits = 16;        // 16-bit ADC
-constexpr float adc_max_voltage = 3.3;  // 3.3 V
+constexpr float current = 0.005;                  // 5 mA
+constexpr uint8_t adc_bits = 16;                  // 16-bit ADC
+constexpr float adc_max_voltage = 3.3;            // 3.3 V
+constexpr float cell_voltage_divider_gain = 0.5;  // cell voltage divider gain before ADC
 
 // diff. amp. resistors
 constexpr float R4 = 10'000.0f;         // 10 kOhm
@@ -76,8 +77,12 @@ void loop() {
     char resistance_str[15];
     snprintf(resistance_str, sizeof(resistance_str), "%.5f Ohm", resistance);
 
+    // format cell voltage for displaying
+    char cell_voltage_str[10];
+    snprintf(cell_voltage_str, sizeof(cell_voltage_str), "%.2f V", cell_voltage);
+
     // display data
-    displayText("0.00 V", resistance_str);
+    displayText(cell_voltage_str, resistance_str);
     delay(1000);
     displayText("", "");
     delay(1000);
