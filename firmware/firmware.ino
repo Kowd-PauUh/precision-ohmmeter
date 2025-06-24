@@ -18,14 +18,13 @@ limitations under the License.
 #include <U8g2lib.h>
 
 // modify these as you need
-uint8_t adc_bits = 16;
-
-// do not modify these
-uint32_t adc_range = 1 << adc_bits;
-
-// constructor for SSD1306 128x32, I2C, no reset pin
+constexpr uint8_t adc_bits = 16;
 // U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 1st I2C interface
 U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
+
+// do not modify these
+float cell_voltage, measured_resistance;
+constexpr uint32_t adc_range = 1 << adc_bits;
 
 void setup() {
     u8g2.begin();  // Initialize display
