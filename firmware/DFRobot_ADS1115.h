@@ -13,7 +13,7 @@
  * @modifications
  * @author Ivan Danylenko
  * @date 2025-06-24
- * - Added `float readVoltagePrecise(uint8_t channel)` to read voltage precisely (tens of microvolts).
+ * - Added `float readVoltagePrecise(uint8_t channel)` to read voltage precisely (microvolts).
  */
 #include "Arduino.h"
 
@@ -359,7 +359,7 @@ public:
   int16_t   getHighThreshold();
   /**
    * @fn readVoltagePrecise
-   * @brief Reads the precise voltage (tens of microvolts) of the specified channel
+   * @brief Reads the precise voltage (up to microvolts) of the specified channel
    * @param  channel   The analog channnel of MCU
    * @return Voltage in millivolts [mV]
    */

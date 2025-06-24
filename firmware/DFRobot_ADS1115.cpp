@@ -13,7 +13,7 @@
  * @modifications
  * @author Ivan Danylenko
  * @date 2025-06-24
- * - Added `float readVoltagePrecise(uint8_t channel)` to read voltage precisely (tens of microvolts).
+ * - Added `float readVoltagePrecise(uint8_t channel)` to read voltage precisely (microvolts).
  */
 #include "Arduino.h"
 #include <Wire.h>
