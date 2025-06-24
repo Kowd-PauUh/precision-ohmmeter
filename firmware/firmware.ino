@@ -17,7 +17,7 @@ limitations under the License.
 #include <cstdint>
 #include <Wire.h>
 #include <U8g2lib.h>
-#include <DFRobot_ADS1115.h>
+#include "DFRobot_ADS1115.h"
 
 // ADJUST FOLLOWING AS YOU NEED
 
@@ -40,7 +40,7 @@ DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
 // DFRobot_ADS1115 ads(&Wire1);  // ADC on 2nd I2C interface
 
 // DO NOT MODIFY THESE
-float cell_voltage, resistance;
+float cell_voltage, voltage, resistance;
 constexpr uint32_t adc_range = 1 << adc_bits;
 constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (~363) in first mode
 constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (33) in second mode
@@ -84,13 +84,14 @@ float compute_resistance(uint32_t adc_reading, float current, float diff_amp_gai
     return voltage_drop / current;
 }
 
-void poll_adc(uint8_t channel) {
+float readVoltage(uint8_t channel) {
     if (ads.checkADS1115())
     {
-        uint16_t adc_reading = ads.readVoltage(channel);
-        Serial.print(adc_reading);
-        Serial.println("mV");
+        float adc_reading = ads.readVoltagePrecise(channel);  // mV
+        adc_reading /= 1000;                                  // V
+        return adc_reading;
     }
+    return NAN;
 }
 
 void loop() {
@@ -112,9 +113,13 @@ void loop() {
     delay(1000);
 
     digitalWrite(29, HIGH);
-    poll_adc(0);
+    voltage = readVoltage(0);
+    Serial.print(voltage, 6);
+    Serial.println(" V");
     delay(1000);
     digitalWrite(29, LOW);
-    poll_adc(0);
+    voltage = readVoltage(0);
+    Serial.print(voltage, 6);
+    Serial.println(" V");
     delay(1000);
 }
