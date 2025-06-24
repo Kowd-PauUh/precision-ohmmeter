@@ -36,8 +36,8 @@ U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD
 // DO NOT MODIFY THESE
 float cell_voltage, resistance;
 constexpr uint32_t adc_range = 1 << adc_bits;
-constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain in first mode
-constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain in second mode
+constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (~363) in first mode
+constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (33) in second mode
 
 void setup() {
     u8g2.begin();  // Initialize display
