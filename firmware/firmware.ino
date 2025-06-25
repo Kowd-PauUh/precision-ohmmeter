@@ -51,7 +51,7 @@ uint8_t mode = 0;
 void setup() {
     // initialize display
     u8g2.begin();
-    pinMode(29, OUTPUT);
+    pinMode(29, OUTPUT);  // DEBUG
 
     // initialize ADC
     ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS0);   // 0x48
@@ -106,7 +106,7 @@ float getGain(uint8_t mode) {
 }
 
 void loop() {
-    digitalWrite(29, HIGH);
+    digitalWrite(29, HIGH);  // DEBUG
 
     // read voltage from ADC
     gain = getGain(mode);
