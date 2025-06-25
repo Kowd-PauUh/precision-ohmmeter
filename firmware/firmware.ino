@@ -96,15 +96,25 @@ float readVoltage(uint8_t channel) {
     return NAN;
 }
 
+float getGain(uint8_t mode) {
+    if (mode == 0) {
+        return mode_0_gain;
+    } else if (mode == 1) {
+        return mode_1_gain;
+    }
+    return NAN;
+}
+
 void loop() {
     digitalWrite(29, HIGH);
 
     // read voltage from ADC
+    gain = getGain(mode);
     voltage = readVoltage(voltage_adc_pin);
     cell_voltage = readVoltage(cell_voltage_adc_pin) / cell_voltage_divider_gain;
 
     // compute resistance value
-    resistance = compute_resistance(voltage, current, mode_0_gain);
+    resistance = compute_resistance(voltage, current, gain);
 
     // format resistance for displaying
     char resistance_str[15];
