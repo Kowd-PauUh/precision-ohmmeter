@@ -76,14 +76,14 @@ void displayText(const char* line1, const char* line2) {
     u8g2.sendBuffer();
 }
 
-float compute_resistance(float voltage, float current, float diff_amp_gain) {
+float compute_resistance(float voltage, float current) {
     // R = U / I
 
     if (current == 0.0f) {
         return INFINITY;
     }
 
-    return voltage / diff_amp_gain / current;
+    return voltage / current;
 }
 
 float readVoltage(uint8_t channel) {
@@ -110,11 +110,11 @@ void loop() {
 
     // read voltage from ADC
     gain = getGain(mode);
-    voltage = readVoltage(voltage_adc_pin);
+    voltage = readVoltage(voltage_adc_pin) / gain;
     cell_voltage = readVoltage(cell_voltage_adc_pin) / cell_voltage_divider_gain;
 
     // compute resistance value
-    resistance = compute_resistance(voltage, current, gain);
+    resistance = compute_resistance(voltage, current);
 
     // format resistance for displaying
     char resistance_str[15];
