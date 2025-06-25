@@ -126,4 +126,7 @@ void loop() {
 
     // display data
     displayText(cell_voltage_str, resistance_str);
+
+    // TODO:
+    // add mode swith with hysteresis
 }
