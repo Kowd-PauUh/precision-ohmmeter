@@ -43,10 +43,10 @@ DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
 // DFRobot_ADS1115 ads(&Wire1);  // ADC on 2nd I2C interface
 
 // DO NOT MODIFY THESE
-uint8_t mode = 0;
-float cell_voltage, voltage, resistance, gain;
 constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (~363) in first mode
 constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (33) in second mode
+float cell_voltage, voltage, resistance, gain;
+uint8_t mode = 0;
 
 void setup() {
     // initialize display
