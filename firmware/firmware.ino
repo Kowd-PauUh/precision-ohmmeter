@@ -67,7 +67,9 @@ void setup() {
 
     // set pin for mode control 
     pinMode(29, OUTPUT);
-    pinMode(29, OUTPUT);  // DEBUG
+
+    pinMode(29, OUTPUT);     // DEBUG
+    digitalWrite(29, HIGH);  // DEBUG
 }
 
 void displayText(const char* line1, const char* line2) {
@@ -122,8 +124,6 @@ void switchMode(float resistance) {
 }
 
 void loop() {
-    digitalWrite(29, HIGH);  // DEBUG
-
     // read voltage from ADC
     gain = getGain(mode);
     voltage = readVoltage(voltage_adc_pin) / gain;
