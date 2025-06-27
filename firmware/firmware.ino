@@ -150,7 +150,7 @@ float getGain(uint8_t mode) {
  * 
  * Switch logic is dependent on the current mode and the resistance,
  * and works as a comparator with hysteresis (thresholds values 
- * defined in `comparator_th` and `comparator_tl`):
+ * defined in `comparator_th` and `comparator_tl` variables):
  * 
  *               ↑ Pin state (`mode_control_pin`)
  *               |
