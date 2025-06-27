@@ -66,7 +66,7 @@ void setup() {
     ads.init();
 
     // set pin for mode control 
-    pinMode(29, OUTPUT);
+    pinMode(mode_control_pin, OUTPUT);
 
     pinMode(29, OUTPUT);     // DEBUG
     digitalWrite(29, HIGH);  // DEBUG
