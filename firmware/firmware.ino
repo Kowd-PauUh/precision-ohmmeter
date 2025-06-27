@@ -152,6 +152,7 @@ float getGain(uint8_t mode) {
  * and works as a comparator with hysteresis (thresholds values 
  * defined in `comparator_th` and `comparator_tl` variables):
  * 
+ * \code{.unparsed}
  *               ↑ Pin state (`mode_control_pin`)
  *               |
  * HIGH (mode 1) |    ←--------        
@@ -160,6 +161,7 @@ float getGain(uint8_t mode) {
  *  LOW (mode 0) |    --------→
  *               +−----------------→  resistance
  *                   tl       th
+ * \endcode
  * 
  * @param resistance Input signal to the "comparator".
  */
