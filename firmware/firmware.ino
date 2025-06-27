@@ -53,14 +53,6 @@ constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (3
 float cell_voltage, voltage, resistance, gain;
 uint8_t mode = 0;
 
-/**
- * @brief Sets up microcontroller and peripherals.
- * 
- * This function:
- * 1. Initializes connection with LCD display,
- * 2. Initializes connection with ADC,
- * 3. Sets microcontroller GPIO pin for control mode.
- */
 void setup() {
     // initialize display
     u8g2.begin();
@@ -80,6 +72,11 @@ void setup() {
     digitalWrite(29, HIGH);  // DEBUG
 }
 
+/**
+ * @brief Displays two lines of text on LCD display.
+ * @param line1 Text to be written in the first line (font 6x13).
+ * @param line2 Text to be written in the second line (font 9x15 bold).
+ */
 void displayText(const char* line1, const char* line2) {
     u8g2.clearBuffer();
 
@@ -94,6 +91,17 @@ void displayText(const char* line1, const char* line2) {
     u8g2.sendBuffer();
 }
 
+/**
+ * @brief Computes resistance.
+ * 
+ * Given voltage drop and current, computes
+ * the resistance using Ohm's law:
+ *              R = U / I
+ * 
+ * @param voltage Voltage drop.
+ * @param current Current.
+ * @return Resistance.
+ */
 float compute_resistance(float voltage, float current) {
     // R = U / I
 
@@ -104,6 +112,11 @@ float compute_resistance(float voltage, float current) {
     return voltage / current;
 }
 
+/**
+ * @brief Reads voltage from a given ADC channel.
+ * @param channel ADC channel.
+ * @return Voltage if ADC is connected. otherwise NAN.
+ */
 float readVoltage(uint8_t channel) {
     if (ads.checkADS1115())
     {
@@ -114,6 +127,11 @@ float readVoltage(uint8_t channel) {
     return NAN;
 }
 
+/**
+ * @brief Selects gain appropriate to the mode.
+ * @param mode Current operating mode (0 or 1).
+ * @return Gain, defined in `mode_0_gain` and `mode_1_gain` variables. NAN for unsupported mode.
+ */
 float getGain(uint8_t mode) {
     if (mode == 0) {
         return mode_0_gain;
@@ -123,6 +141,28 @@ float getGain(uint8_t mode) {
     return NAN;
 }
 
+/**
+ * @brief Switches mode with hysteresis.
+
+ * Switches between two modes:
+ *     0: `mode_control_pin` is set to LOW state
+ *     1: `mode_control_pin` is set to HIGH state
+ * 
+ * Switch logic is dependent on the current mode and the resistance,
+ * and works as a comparator with hysteresis (thresholds values 
+ * defined in `comparator_th` and `comparator_tl`):
+ * 
+ *               ↑ Pin state (`mode_control_pin`)
+ *               |
+ * HIGH (mode 1) |    ←--------        
+ *               |   |         ↑
+ *               |   ↓         |
+ *  LOW (mode 0) |    --------→
+ *               +−----------------→  resistance
+ *                   tl       th
+ * 
+ * @param resistance Input signal to the "comparator".
+ */
 void switchMode(float resistance) {
     if (mode == 0) {
         if (resistance > comparator_th) { digitalWrite(mode_control_pin, HIGH); mode = 1; }
