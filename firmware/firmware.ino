@@ -53,6 +53,14 @@ constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (3
 float cell_voltage, voltage, resistance, gain;
 uint8_t mode = 0;
 
+/**
+ * @brief Sets up microcontroller and peripherals.
+ * 
+ * This function:
+ * 1. Initializes connection with LCD display,
+ * 2. Initializes connection with ADC,
+ * 3. Sets microcontroller GPIO pin for control mode.
+ */
 void setup() {
     // initialize display
     u8g2.begin();
