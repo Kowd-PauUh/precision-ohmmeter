@@ -22,10 +22,11 @@
 // ADJUST FOLLOWING AS YOU NEED
 
 // mode switch with hysteresis
-constexpr float comparator_th = 1.75;  // 1.75 Ohm (high threshold)
-constexpr float comparator_tl = 1.70;  // 1.70 Ohm (low threshold)
+constexpr float comparator_th = 1.75;     // 1.75 Ohm (high threshold)
+constexpr float comparator_tl = 1.70;     // 1.70 Ohm (low threshold)
+constexpr uint8_t mode_control_pin = 28;
 
-// PCB
+// PCB characteristics
 constexpr float current = 0.005;                  // 5 mA
 constexpr float cell_voltage_divider_gain = 0.5;  // cell voltage divider gain before ADC
 
@@ -55,7 +56,6 @@ uint8_t mode = 0;
 void setup() {
     // initialize display
     u8g2.begin();
-    pinMode(29, OUTPUT);  // DEBUG
 
     // initialize ADC
     ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS0);   // 0x48
@@ -64,6 +64,10 @@ void setup() {
     ads.setRate(eRATE_128);                      // 128 samples per second
     ads.setOSMode(eOSMODE_SINGLE);               // manual trigger for each conversion
     ads.init();
+
+    // set pin for mode control 
+    pinMode(29, OUTPUT);
+    pinMode(29, OUTPUT);  // DEBUG
 }
 
 void displayText(const char* line1, const char* line2) {
@@ -111,9 +115,9 @@ float getGain(uint8_t mode) {
 
 void switchMode(float resistance) {
     if (mode == 0) {
-        if (resistance > comparator_th) { mode = 1; }
+        if (resistance > comparator_th) { digitalWrite(mode_control_pin, HIGH); mode = 1; }
     } else if (mode == 1) {
-        if (resistance < comparator_tl) { mode = 0; }
+        if (resistance < comparator_tl) { digitalWrite(mode_control_pin, LOW);  mode = 0; }
     }
 }
 
