@@ -129,7 +129,7 @@ float readVoltage(uint8_t channel) {
 
 /**
  * @brief Selects gain appropriate to the mode.
- * @param mode Current operating mode (0 or 1).
+ * @param mode Operating mode (0 or 1).
  * @return Gain, defined in `mode_0_gain` and `mode_1_gain` variables. NAN for unsupported mode.
  */
 float getGain(uint8_t mode) {
