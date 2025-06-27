@@ -21,6 +21,10 @@
 
 // ADJUST FOLLOWING AS YOU NEED
 
+// mode switch with hysteresis
+constexpr float comparator_th = 1.75;  // 1.75 Ohm (high threshold)
+constexpr float comparator_tl = 1.70;  // 1.70 Ohm (low threshold)
+
 // PCB
 constexpr float current = 0.005;                  // 5 mA
 constexpr float cell_voltage_divider_gain = 0.5;  // cell voltage divider gain before ADC
@@ -105,6 +109,14 @@ float getGain(uint8_t mode) {
     return NAN;
 }
 
+void switchMode(float resistance) {
+    if (mode == 0) {
+        if (resistance > comparator_th) { mode = 1; }
+    } else if (mode == 1) {
+        if (resistance < comparator_tl) { mode = 0; }
+    }
+}
+
 void loop() {
     digitalWrite(29, HIGH);  // DEBUG
 
@@ -127,6 +139,6 @@ void loop() {
     // display data
     displayText(cell_voltage_str, resistance_str);
 
-    // TODO:
-    // add mode swith with hysteresis
+    // mode switch with hysteresis
+    switchMode(resistance);
 }
