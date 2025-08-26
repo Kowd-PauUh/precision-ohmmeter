@@ -67,9 +67,6 @@ void setup() {
 
     // set pin for mode control 
     pinMode(mode_control_pin, OUTPUT);
-
-    pinMode(29, OUTPUT);     // DEBUG
-    digitalWrite(29, HIGH);  // DEBUG
 }
 
 /**
