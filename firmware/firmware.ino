@@ -144,6 +144,18 @@ float readVoltage(uint8_t channel) {
     return NAN;
 }
 
+/**
+ * @brief Reads cell voltage.
+ *
+ * Reads the cell voltage from the ADC, stores it in a circular buffer,
+ * and returns the average of the most recent samples.
+ *
+ * The buffer holds up to `cell_voltage_buffer_size` measurements.
+ * Before it is full, only valid samples are averaged. Once full,
+ * the oldest value is overwritten each new reading.
+ *
+ * @return Average of the last `cell_voltage_buffer_size` voltage measurements in volts.
+ */
 float readCellVoltage() {
     float voltage_reading = 3.3 * analogRead(cell_voltage_adc_pin) / 1023.0 / cell_voltage_divider_gain;
 
