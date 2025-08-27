@@ -37,7 +37,7 @@ constexpr float R8 = 1'000.0f;                    // 1 kOhm
 
 // ADC pinout
 constexpr uint8_t voltage_adc_pin = 0;
-constexpr uint8_t cell_voltage_adc_pin = 1;
+constexpr int cell_voltage_adc_pin = 28;
 
 // LCD display
 // U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);   // LCD on 1st I2C interface
@@ -50,7 +50,9 @@ DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
 // DO NOT MODIFY THESE
 constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (~363) in first mode
 constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (33) in second mode
-float cell_voltage, voltage, resistance, gain;
+constexpr uint8_t cell_voltage_buffer_size = 32;
+float cell_voltage_buffer[cell_voltage_buffer_size], cell_voltage, voltage, resistance, gain;
+uint8_t cell_voltage_buffer_index = 0, cell_voltage_buffer_filled = false;
 uint8_t mode = 0;
 
 void setup() {
@@ -142,6 +144,25 @@ float readVoltage(uint8_t channel) {
     return NAN;
 }
 
+float readCellVoltage() {
+    float voltage_reading = 3.3 * analogRead(cell_voltage_adc_pin) / 1023.0 / cell_voltage_divider_gain;
+
+    // store reading in buffer using circular overwrite
+    cell_voltage_buffer[cell_voltage_buffer_index] = voltage_reading;
+    cell_voltage_buffer_index = (cell_voltage_buffer_index + 1) % cell_voltage_buffer_size;
+
+    // mark buffer filled after full cycle
+    if (cell_voltage_buffer_index == 0) cell_voltage_buffer_filled = true;
+
+    // average readings
+    uint8_t count = cell_voltage_buffer_filled ? cell_voltage_buffer_size : cell_voltage_buffer_index;
+    float sum = 0;
+    for (uint8_t i = 0; i < count; i++) {
+        sum += cell_voltage_buffer[i];
+    }
+    return sum / count;
+}
+
 /**
  * @brief Selects gain appropriate to the mode.
  * @param mode Operating mode (0 or 1).
@@ -192,7 +213,7 @@ void loop() {
     // read voltage from ADC
     gain = getGain(mode);
     voltage = readVoltage(voltage_adc_pin) / gain;
-    cell_voltage = readVoltage(cell_voltage_adc_pin) / cell_voltage_divider_gain;
+    cell_voltage = readCellVoltage();
 
     // compute resistance value
     resistance = compute_resistance(voltage, current);
