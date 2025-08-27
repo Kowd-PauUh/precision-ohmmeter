@@ -54,6 +54,10 @@ float cell_voltage, voltage, resistance, gain;
 uint8_t mode = 0;
 
 void setup() {
+    // indicate initialization start
+    pinMode(LED_BUILTIN, OUTPUT);
+    blink_led();
+
     // initialize display
     u8g2.begin();
 
@@ -67,6 +71,20 @@ void setup() {
 
     // set pin for mode control 
     pinMode(mode_control_pin, OUTPUT);
+}
+
+/**
+ * @brief Blinks the built-in LED four times.
+ */
+void blink_led() {
+    for (uint8_t i = 0; i < 8; i++) {
+        if (i % 2 == 0) {
+            digitalWrite(LED_BUILTIN, HIGH);
+        } else {
+            digitalWrite(LED_BUILTIN, LOW);
+        }
+        delay(250);
+    }
 }
 
 /**
