@@ -24,7 +24,7 @@
 // mode switch with hysteresis
 constexpr float comparator_th = 1.75;     // 1.75 Ohm (high threshold)
 constexpr float comparator_tl = 1.70;     // 1.70 Ohm (low threshold)
-constexpr uint8_t mode_control_pin = 28;
+constexpr uint8_t mode_control_pin = 29;
 
 // PCB characteristics
 constexpr float current = 0.005;                  // 5 mA
