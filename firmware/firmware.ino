@@ -40,8 +40,8 @@ constexpr uint8_t voltage_adc_pin = 0;
 constexpr int cell_voltage_adc_pin = 28;
 
 // LCD display
-// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);   // LCD on 1st I2C interface
-U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
+// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);   // LCD on 1st I2C interface
+U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
 
 // ADC converter
 DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
