@@ -223,12 +223,12 @@ void switchMode(float resistance) {
 
 void loop() {
     // read voltage from ADC
-    gain = getGain(mode);
-    voltage = readVoltage(voltage_adc_pin) / gain;
+    gain = getGain(/*mode=*/mode);
+    voltage = readVoltage(/*channel=*/voltage_adc_pin) / gain;
     cell_voltage = readCellVoltage();
 
     // compute resistance value
-    resistance = compute_resistance(voltage, current);
+    resistance = compute_resistance(/*voltage=*/voltage, /*current=*/current);
 
     // format resistance for displaying
     char resistance_str[15];
@@ -239,8 +239,8 @@ void loop() {
     snprintf(cell_voltage_str, sizeof(cell_voltage_str), "%.2f V", cell_voltage);
 
     // display data
-    displayText(cell_voltage_str, resistance_str);
+    displayText(/*line1=*/cell_voltage_str, /*line2=*/resistance_str);
 
     // mode switch with hysteresis
-    switchMode(resistance);
+    switchMode(/*resistance=*/resistance);
 }
