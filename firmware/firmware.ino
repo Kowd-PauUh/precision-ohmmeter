@@ -33,7 +33,7 @@ constexpr float cell_voltage_divider_gain = 0.5;  // cell voltage divider gain b
 // diff. amp. resistors
 constexpr float R4 = 10'000.0f;                   // 10 kOhm
 constexpr float R5 = 330'000.0f;                  // 330 kOhm
-constexpr float R8 = 1'000.0f;                    // 1 kOhm
+constexpr float R8 = 1'000.0f + 5.0f;             // 1 kOhm + 5 Ohm (typ. ON resistance of the analogue switch)
 
 // ADC pinout
 constexpr uint8_t voltage_adc_pin = 0;
