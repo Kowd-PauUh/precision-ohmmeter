@@ -70,7 +70,7 @@ void setup() {
     ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS0);   // 0x48
     ads.setGain(eGAIN_ONE);                      // no gain
     ads.setMode(eMODE_SINGLE);                   // single-shot mode
-    ads.setRate(eRATE_8);                        // 8 samples per second
+    ads.setRate(eRATE_32);                       // 32 samples per second
     ads.setOSMode(eOSMODE_SINGLE);               // manual trigger for each conversion
     ads.init();
 
