@@ -15,6 +15,7 @@
  */
 
 #include <cstdint>
+#include <algorithm>
 #include <Wire.h>
 #include <U8g2lib.h>
 #include "DFRobot_ADS1115.h"
@@ -228,6 +229,7 @@ void loop() {
     // read voltage from ADC
     gain = getGain(/*mode=*/mode);
     voltage = readVoltage(/*channel=*/voltage_adc_pin) / gain;
+    voltage = std::max(0.0f, voltage);  // zero out negative reading if occurs
     cell_voltage = readCellVoltage();
 
     // compute resistance value
