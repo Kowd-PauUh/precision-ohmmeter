@@ -42,18 +42,20 @@ constexpr int cell_voltage_adc_pin = 28;
 // LCD display
 // U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);   // LCD on 1st I2C interface
 U8G2_SSD1306_128X32_UNIVISION_F_2ND_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);  // LCD on 2nd I2C interface
-constexpr uint8_t precision = 4;                                          // digits after comma for resistance display
+constexpr uint8_t mode_0_precision = 4;                                   // digits after comma for resistance display in mode 0
+constexpr uint8_t mode_1_precision = 3;                                   // digits after comma for resistance display in mode 1
 
 // ADC converter
 DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
 // DFRobot_ADS1115 ads(&Wire1);  // ADC on 2nd I2C interface
 
 // DO NOT MODIFY THESE
-constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (~363) in first mode
+constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (363) in first mode
 constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (33) in second mode
 constexpr uint8_t cell_voltage_buffer_size = 32;
 float cell_voltage_buffer[cell_voltage_buffer_size], cell_voltage, voltage, resistance, gain;
 uint8_t cell_voltage_buffer_index = 0, cell_voltage_buffer_filled = false;
+uint8_t precision = mode_0_precision;
 uint8_t mode = 0;
 
 void setup() {
@@ -216,9 +218,9 @@ float getGain(uint8_t mode) {
  */
 void switchMode(float resistance) {
     if (mode == 0) {
-        if (resistance > comparator_th) { digitalWrite(mode_control_pin, HIGH); mode = 1; }
+        if (resistance > comparator_th) { digitalWrite(mode_control_pin, HIGH); mode = 1; precision = mode_1_precision; }
     } else if (mode == 1) {
-        if (resistance < comparator_tl) { digitalWrite(mode_control_pin, LOW);  mode = 0; }
+        if (resistance < comparator_tl) { digitalWrite(mode_control_pin, LOW);  mode = 0; precision = mode_0_precision; }
     }
 }
 
