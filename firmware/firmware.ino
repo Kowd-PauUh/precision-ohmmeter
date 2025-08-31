@@ -136,8 +136,6 @@ void displayText(const char* text, int glyph) {
  * @return Resistance.
  */
 float computeResistance(float voltage, float current) {
-    // R = U / I
-
     if (current == 0.0f) {
         return INFINITY;
     }
