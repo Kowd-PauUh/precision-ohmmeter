@@ -73,6 +73,12 @@ void setup() {
     // initialize display
     u8g2.begin();
 
+    // display cell voltage for 2 seconds
+    displayCellVoltage();
+    delay(2000);
+    displayText(/*text=*/"", /*glyph=*/0x2800);
+    delay(500);
+
     // initialize ADC
     ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS0);   // 0x48
     ads.setGain(eGAIN_ONE);                      // no gain
@@ -100,20 +106,20 @@ void blinkLed() {
 }
 
 /**
- * @brief Displays two lines of text on LCD display.
- * @param line1 Text to be written in the first line (font 6x13).
- * @param line2 Text to be written in the second line (font 9x15 bold).
+ * @brief Displays a single line of text on LCD display.
+ * @param text Text to be displayed.
  */
-void displayText(const char* line1, const char* line2) {
+void displayText(const char* text, int glyph) {
     u8g2.clearBuffer();
 
-    // 1st line, right-aligned
-    u8g2.setFont(u8g2_font_6x13_tf);
-    u8g2.drawStr(u8g2.getDisplayWidth() - u8g2.getStrWidth(line1), 12, line1);
+    // left-bottom centered text
+    u8g2.setFont(u8g2_font_inr24_mn);
+    u8g2.drawStr(0, u8g2.getDisplayHeight() - 1, text);
+    int16_t textWidth = u8g2.getStrWidth(text);
 
-    // 2nd line, left-aligned
-    u8g2.setFont(u8g2_font_9x15B_tf);
-    u8g2.drawStr(0, 28, line2);
+    // unicode symbol on the right
+    u8g2.setFont(u8g2_font_unifont_t_symbols);
+    u8g2.drawGlyph(textWidth, u8g2.getDisplayHeight() - 1, glyph);
 
     u8g2.sendBuffer();
 }
@@ -181,6 +187,20 @@ float readCellVoltage() {
 }
 
 /**
+ * @brief Displays cell voltage on LCD display.
+ */
+void displayCellVoltage() {
+    cell_voltage = readCellVoltage();
+
+    // format cell voltage for displaying
+    char cell_voltage_str[10];
+    snprintf(cell_voltage_str, sizeof(cell_voltage_str), "%.2f", cell_voltage);
+
+    // display data
+    displayText(/*text=*/cell_voltage_str, /*glyph=*/0x0056);
+}
+
+/**
  * @brief Selects gain appropriate to the mode.
  * @param mode Operating mode (0 or 1).
  * @return Gain, defined in `mode_0_gain` and `mode_1_gain` variables. NAN for unsupported mode.
@@ -231,21 +251,16 @@ void loop() {
     gain = getGain(/*mode=*/mode);
     voltage = readVoltage() / gain;
     voltage = std::max(0.0f, voltage);  // zero out negative reading if occurs
-    cell_voltage = readCellVoltage();
 
     // compute resistance value
     resistance = computeResistance(/*voltage=*/voltage, /*current=*/current);
 
     // format resistance for displaying
     char resistance_str[15];
-    snprintf(resistance_str, sizeof(resistance_str), "%.*f Ohm", precision, resistance);
-
-    // format cell voltage for displaying
-    char cell_voltage_str[10];
-    snprintf(cell_voltage_str, sizeof(cell_voltage_str), "%.2f V", cell_voltage);
+    snprintf(resistance_str, sizeof(resistance_str), "%.*f", precision, resistance);
 
     // display data
-    displayText(/*line1=*/cell_voltage_str, /*line2=*/resistance_str);
+    displayText(/*text=*/resistance_str, /*glyph=*/0x2126);
 
     // mode switch with hysteresis
     switchMode(/*resistance=*/resistance);
