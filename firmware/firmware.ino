@@ -115,11 +115,11 @@ void displayText(const char* text, int glyph) {
     // left-bottom centered text
     u8g2.setFont(u8g2_font_inr24_mn);
     u8g2.drawStr(0, u8g2.getDisplayHeight() - 1, text);
-    int16_t textWidth = u8g2.getStrWidth(text);
+    int16_t text_width = u8g2.getStrWidth(text);
 
     // unicode symbol on the right
     u8g2.setFont(u8g2_font_unifont_t_symbols);
-    u8g2.drawGlyph(textWidth, u8g2.getDisplayHeight() - 1, glyph);
+    u8g2.drawGlyph(text_width, u8g2.getDisplayHeight() - 1, glyph);
 
     u8g2.sendBuffer();
 }
