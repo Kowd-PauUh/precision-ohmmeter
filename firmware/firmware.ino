@@ -32,6 +32,7 @@ constexpr uint8_t mode_control_pin = 29;
 // PCB characteristics
 constexpr float current = 0.005;                  // 5 mA
 constexpr float cell_voltage_divider_gain = 0.5;  // cell voltage divider gain before ADC
+constexpr float out_of_range_threshold = 19.5;    // threshold (in Ohms) above which the measurement is considered out of range
 
 // diff. amp. resistors
 constexpr float R4 = 10'000.0f;                   // 10 kOhm
@@ -76,7 +77,7 @@ void setup() {
     // display cell voltage for 2 seconds
     displayCellVoltage();
     delay(2000);
-    displayText(/*text=*/"", /*glyph=*/0x2800);
+    displayData(/*text=*/"", /*glyph=*/0x2800);
     delay(500);
 
     // initialize ADC
@@ -106,13 +107,13 @@ void blinkLed() {
 }
 
 /**
- * @brief Displays a single line of text on LCD display.
- * @param text Text to be displayed.
+ * @brief Displays a single numerical string followed by a unicode symbol on LCD display.
+ * @param text Numeric string to be displayed.
  */
-void displayText(const char* text, int glyph) {
+void displayData(const char* text, int glyph) {
     u8g2.clearBuffer();
 
-    // left-bottom centered text
+    // left-bottom centered numeric string
     u8g2.setFont(u8g2_font_inr24_mn);
     u8g2.drawStr(0, u8g2.getDisplayHeight() - 1, text);
     int16_t text_width = u8g2.getStrWidth(text);
@@ -120,6 +121,20 @@ void displayText(const char* text, int glyph) {
     // unicode symbol on the right
     u8g2.setFont(u8g2_font_unifont_t_symbols);
     u8g2.drawGlyph(text_width, u8g2.getDisplayHeight() - 1, glyph);
+
+    u8g2.sendBuffer();
+}
+
+/**
+ * @brief Displays a single string on LCD display.
+ * @param text Text to be displayed.
+ */
+void displayText(const char* text) {
+    u8g2.clearBuffer();
+
+    // left-bottom centered text
+    u8g2.setFont(u8g2_font_fub14_tf);
+    u8g2.drawStr(0, u8g2.getDisplayHeight() - 5, text);
 
     u8g2.sendBuffer();
 }
@@ -195,7 +210,7 @@ void displayCellVoltage() {
     snprintf(cell_voltage_str, sizeof(cell_voltage_str), "%.2f", cell_voltage);
 
     // display data
-    displayText(/*text=*/cell_voltage_str, /*glyph=*/0x0056);
+    displayData(/*text=*/cell_voltage_str, /*glyph=*/0x0056);
 }
 
 /**
@@ -258,7 +273,11 @@ void loop() {
     snprintf(resistance_str, sizeof(resistance_str), "%.*f", precision, resistance);
 
     // display data
-    displayText(/*text=*/resistance_str, /*glyph=*/0x2126);
+    if (resistance <= out_of_range_threshold) {
+        displayData(/*text=*/resistance_str, /*glyph=*/0x2126);
+    } else {
+        displayText(/*text=*/"Out of range");
+    }
 
     // mode switch with hysteresis
     switchMode(/*resistance=*/resistance);
