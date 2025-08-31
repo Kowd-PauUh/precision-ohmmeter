@@ -15,9 +15,11 @@
  */
 
 #include <cstdint>
-#include <algorithm>
+
 #include <Wire.h>
 #include <U8g2lib.h>
+
+#include "data_aggregation.h"
 #include "DFRobot_ADS1115.h"
 
 // ADJUST FOLLOWING AS YOU NEED
@@ -50,19 +52,23 @@ constexpr uint8_t mode_1_precision = 3;                                   // dig
 DFRobot_ADS1115 ads(&Wire);  // ADC on 1st I2C interface
 // DFRobot_ADS1115 ads(&Wire1);  // ADC on 2nd I2C interface
 
+// Readings aggregation
+constexpr uint8_t buffer_size = 8;
+AggregationMode aggregation_mode = AggregationMode::MODE;
+
 // DO NOT MODIFY THESE
 constexpr float mode_0_gain = R5 * (R4 + R8) / (R4 * R8);  // diff. amp. gain (363) in first mode
 constexpr float mode_1_gain = R5 / R4;                     // diff. amp. gain (33) in second mode
-constexpr uint8_t cell_voltage_buffer_size = 32;
-float cell_voltage_buffer[cell_voltage_buffer_size], cell_voltage, voltage, resistance, gain;
-uint8_t cell_voltage_buffer_index = 0, cell_voltage_buffer_filled = false;
+float buffer[buffer_size], scratch[buffer_size];
+float voltage, cell_voltage, resistance, gain;
+bool buffer_filled = false;
 uint8_t precision = mode_0_precision;
-uint8_t mode = 0;
+uint8_t buffer_index = 0, mode = 0;
 
 void setup() {
     // indicate initialization start
     pinMode(LED_BUILTIN, OUTPUT);
-    blink_led();
+    blinkLed();
 
     // initialize display
     u8g2.begin();
@@ -71,7 +77,7 @@ void setup() {
     ads.setAddr_ADS1115(ADS1115_IIC_ADDRESS0);   // 0x48
     ads.setGain(eGAIN_ONE);                      // no gain
     ads.setMode(eMODE_SINGLE);                   // single-shot mode
-    ads.setRate(eRATE_32);                       // 32 samples per second
+    ads.setRate(eRATE_64);                       // 32 samples per second
     ads.setOSMode(eOSMODE_SINGLE);               // manual trigger for each conversion
     ads.init();
 
@@ -82,7 +88,7 @@ void setup() {
 /**
  * @brief Blinks the built-in LED four times.
  */
-void blink_led() {
+void blinkLed() {
     for (uint8_t i = 0; i < 8; i++) {
         if (i % 2 == 0) {
             digitalWrite(LED_BUILTIN, HIGH);
@@ -123,7 +129,7 @@ void displayText(const char* line1, const char* line2) {
  * @param current Current.
  * @return Resistance.
  */
-float compute_resistance(float voltage, float current) {
+float computeResistance(float voltage, float current) {
     // R = U / I
 
     if (current == 0.0f) {
@@ -134,49 +140,44 @@ float compute_resistance(float voltage, float current) {
 }
 
 /**
- * @brief Reads voltage from a given ADC channel.
- * @param channel ADC channel.
- * @return Voltage if ADC is connected. otherwise NAN.
+ * @brief Reads voltage from ADC.
+ * 
+ * Reads the voltage from the ADC, stores it in a circular buffer,
+ * and returns the aggregation result of the most recent samples.
+ * 
+ * The buffer holds up to `buffer_size` measurements.
+ * Before it is full, only valid samples are averaged.
+ * Once full, the oldest value is overwritten each new reading.
+ * 
+ * @return Last `buffer_size` voltage measurements in volts aggregated 
+ *         using `aggregation_mode` if ADC is connected. Otherwise NAN.
  */
-float readVoltage(uint8_t channel) {
+float readVoltage() {
+    float adc_reading = NAN;
     if (ads.checkADS1115())
     {
-        float adc_reading = ads.readVoltagePrecise(channel);  // mV
-        adc_reading /= 1000;                                  // V
-        return adc_reading;
+        adc_reading = ads.readVoltagePrecise(voltage_adc_pin);  // mV
+        adc_reading /= 1000;                                    // V
     }
-    return NAN;
+
+    // store reading in buffer using circular overwrite
+    buffer[buffer_index] = adc_reading;
+    buffer_index = (buffer_index + 1) % buffer_size;
+
+    // mark buffer filled after full cycle
+    if (buffer_index == 0) buffer_filled = true;
+
+    // aggregate readings
+    uint8_t count = buffer_filled ? buffer_size : buffer_index;
+    return aggregateBuffer(/*buffer=*/buffer, /*count=*/count, /*mode=*/aggregation_mode, /*scratch=*/scratch);
 }
 
 /**
  * @brief Reads cell voltage.
- *
- * Reads the cell voltage from the ADC, stores it in a circular buffer,
- * and returns the average of the most recent samples.
- *
- * The buffer holds up to `cell_voltage_buffer_size` measurements.
- * Before it is full, only valid samples are averaged. Once full,
- * the oldest value is overwritten each new reading.
- *
- * @return Average of the last `cell_voltage_buffer_size` voltage measurements in volts.
+ * @return Cell voltage in volts.
  */
 float readCellVoltage() {
-    float voltage_reading = 3.3 * analogRead(cell_voltage_adc_pin) / 1023.0 / cell_voltage_divider_gain;
-
-    // store reading in buffer using circular overwrite
-    cell_voltage_buffer[cell_voltage_buffer_index] = voltage_reading;
-    cell_voltage_buffer_index = (cell_voltage_buffer_index + 1) % cell_voltage_buffer_size;
-
-    // mark buffer filled after full cycle
-    if (cell_voltage_buffer_index == 0) cell_voltage_buffer_filled = true;
-
-    // average readings
-    uint8_t count = cell_voltage_buffer_filled ? cell_voltage_buffer_size : cell_voltage_buffer_index;
-    float sum = 0;
-    for (uint8_t i = 0; i < count; i++) {
-        sum += cell_voltage_buffer[i];
-    }
-    return sum / count;
+    return 3.3f * analogRead(cell_voltage_adc_pin) / 1023.0f / cell_voltage_divider_gain;
 }
 
 /**
@@ -228,12 +229,12 @@ void switchMode(float resistance) {
 void loop() {
     // read voltage from ADC
     gain = getGain(/*mode=*/mode);
-    voltage = readVoltage(/*channel=*/voltage_adc_pin) / gain;
+    voltage = readVoltage() / gain;
     voltage = std::max(0.0f, voltage);  // zero out negative reading if occurs
     cell_voltage = readCellVoltage();
 
     // compute resistance value
-    resistance = compute_resistance(/*voltage=*/voltage, /*current=*/current);
+    resistance = computeResistance(/*voltage=*/voltage, /*current=*/current);
 
     // format resistance for displaying
     char resistance_str[15];
