@@ -254,7 +254,7 @@ void loop() {
     resistance = computeResistance(/*voltage=*/voltage, /*current=*/current);
 
     // format resistance for displaying
-    char resistance_str[15];
+    char resistance_str[10];
     snprintf(resistance_str, sizeof(resistance_str), "%.*f", precision, resistance);
 
     // display data
